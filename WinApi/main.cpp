@@ -1,8 +1,10 @@
 #include<Windows.h>
+#include<CommCtrl.h>
 #include"resource.h"
 
 BOOL CALLBACK DlgProg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
+CONST CHAR TextForLogin[] = "¬ведите логин: ";
+CONST CHAR TextForPassword[] = "¬ведите пароль: ";
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, INT nCmdShow)
 {
 	/*MessageBox
@@ -34,6 +36,8 @@ BOOL CALLBACK DlgProg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		HICON hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));
 		SendMessage(hwnd, WM_SETICON, 0, (LPARAM)hIcon);
 		//SetFocus(GetDlgItem(hwnd, IDC_EDIT_LOGIN));
+		SendMessage(GetDlgItem(hwnd, IDC_EDIT_LOGIN), EM_SETCUEBANNER, FALSE, (LPARAM)L"¬ведите логин: ");
+		SendMessage(GetDlgItem(hwnd, IDC_EDIT_PASSWORD), EM_SETCUEBANNER, FALSE, (LPARAM)L"¬ведите пароль: ");
 	}
 	break;
 	case WM_COMMAND:	//ќбрабатывает команды с клавиатуры и мыши.
@@ -47,9 +51,6 @@ BOOL CALLBACK DlgProg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			HWND hEditPassword = GetDlgItem(hwnd, IDC_EDIT_PASSWORD);
 			SendMessage(hEditLogin, WM_GETTEXT, SIZE, (LPARAM)sz_buffer);
 			SendMessage(hEditPassword, WM_SETTEXT, 0, (LPARAM)sz_buffer);
-
-
-			
 		}
 		break;
 		case IDOK:
