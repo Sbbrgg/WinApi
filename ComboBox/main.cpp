@@ -1,4 +1,4 @@
-#include<Windows.h>
+﻿#include<Windows.h>
 #include"resource1.h"
 
 CONST CHAR* g_sz_VALUES[] = { "This", "is", "my", "fisrt", "Combo", "Box" };
@@ -29,7 +29,7 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch (LOWORD(wParam))
 		{
 		case IDOK:
-			SendMessage(hwnd,)
+			//SendMessage(hwnd,)
 			break;
 		case IDCANCEL:
 			EndDialog(hwnd, 0);
