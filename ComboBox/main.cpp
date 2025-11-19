@@ -34,9 +34,25 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			int index = SendMessage(hCombo, CB_GETCURSEL, 0, 0);
 			if (index != CB_ERR)
 			{
-				char message[256];
-				SendMessage(hCombo, CB_GETLBTEXT, index, (LPARAM)message);
-				MessageBox(hwnd, message, "Содержимое элемента", MB_OK);
+				char selectedText[256];
+				SendMessage(hCombo, CB_GETLBTEXT, index, (LPARAM)selectedText);
+
+				char message[512];
+				char numberStr[16];
+
+				_itoa_s(index, numberStr, 10);
+
+				lstrcpy(message, "Вы выбрали элемент № ");
+				lstrcat(message, numberStr);
+				lstrcat(message, " со значением '");
+				lstrcat(message, selectedText);
+				lstrcat(message, "'");
+
+				MessageBox(hwnd, message, "Выбор элемента", MB_OK | MB_ICONINFORMATION);
+			}
+			else
+			{
+				MessageBox(hwnd, "Пожалуйста, выберите элемент из списка", "Предупреждение", MB_OK | MB_ICONWARNING);
 			}
 		}
 		break;
