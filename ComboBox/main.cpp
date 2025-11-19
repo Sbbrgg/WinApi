@@ -1,4 +1,5 @@
-﻿#include<Windows.h>
+﻿#define _CRT_SECURE_NO_WARNINGS
+#include<Windows.h>
 #include"resource1.h"
 
 CONST CHAR* g_sz_VALUES[] = { "This", "is", "my", "fisrt", "Combo", "Box" };
@@ -40,7 +41,7 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				char message[512];
 				char numberStr[16];
 
-				_itoa_s(index, numberStr, 10);
+				_itoa(index, numberStr, 10);
 
 				lstrcpy(message, "Вы выбрали элемент № ");
 				lstrcat(message, numberStr);
