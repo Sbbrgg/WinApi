@@ -32,7 +32,7 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 		case IDC_ADDBUTTON:
 		{
-			DialogBoxParam(NULL, MAKEINTRESOURCE(IDD_EDIT_DIALOG), hwnd, (DLGPROC)EditDlgProc, (LPARAM)-1);
+			DialogBoxParam(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_EDIT_DIALOG), hwnd, (DLGPROC)EditDlgProc, (LPARAM)-1);
 		}
 		break;
 		case IDC_BUTTON_DELETE:
@@ -44,7 +44,7 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				INT index = SendMessage(hListBox, LB_GETCURSEL, 0, 0);
 				if (index != LB_ERR)
 				{
-					DialogBoxParam(NULL, MAKEINTRESOURCE(IDD_EDIT_DIALOG), hwnd, (DLGPROC)EditDlgProc, (LPARAM)index);
+					DialogBoxParam(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_EDIT_DIALOG), hwnd, (DLGPROC)EditDlgProc, (LPARAM)index);
 				}
 			}
 
@@ -55,9 +55,12 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			INT index = SendMessage(hListBox, LB_GETCURSEL, 0, 0);
 			if (index != LB_ERR)
 			{
-				DialogBoxParam(GetPar, MAKEINTRESOURCE(IDD_EDIT_DIALOG), hwnd, (DLGPROC)EditDlgProc, (LPARAM)index);
+				DialogBoxParam(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_EDIT_DIALOG), hwnd, (DLGPROC)EditDlgProc, (LPARAM)index);
 			}
-			else DialogBoxParam(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_EDIT_DIALOG), hwnd, (DLGPROC)EditDlgProc, (LPARAM)-1);
+			else
+			{
+				
+			}
 		}
 		break;
 		case IDCANCEL:
@@ -100,30 +103,6 @@ BOOL CALLBACK EditDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch (LOWORD(wParam))
 		{
 		case IDOK:
-		{
-			CHAR szBuffer[256];
-			GetDlgItemText(hwnd, IDC_EDIT_ITEM, szBuffer, sizeof(szBuffer));
-
-			if (strlen(szBuffer) > 0)
-			{
-				if (editIndex == -1)
-				{
-					INT newIndex = SendMessage(hMainListBox, LB_ADDSTRING, 0, (LPARAM)szBuffer);
-					if (newIndex != LB_ERR)
-					{
-						SendMessage(hMainListBox, LB_SETCURSEL, newIndex, 0);
-					}
-				}
-				else
-				{
-					SendMessage(hMainListBox, LB_DELETESTRING, editIndex, 0);
-					SendMessage(hMainListBox, LB_INSERTSTRING, editIndex, (LPARAM)szBuffer);
-					SendMessage(hMainListBox, LB_SETCURSEL, editIndex, 0);
-				}
-			}
-
-		EndDialog(hwnd, 0);
-		}
 		break;
 		case IDCANCEL:
 			EndDialog(hwnd, 0);

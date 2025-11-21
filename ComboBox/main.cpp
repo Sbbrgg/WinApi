@@ -40,7 +40,7 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			if (i != CB_ERR)
 			{
 				SendMessage(hCombo, CB_GETLBTEXT, i, (LPARAM)sz_buffer);
-				sprintf(sz_message, "Вы выбрали элемент №%i со значением \"%s\".", i, sz_buffer);	//1.буффер куда помещаем сообщение
+				sprintf(sz_message, "Вы выбрали элемент №%i со значением \"%s\".", i, sz_buffer);
 				MessageBox(hwnd, sz_message, "Info", MB_OK | MB_ICONINFORMATION);
 			}
 			else
