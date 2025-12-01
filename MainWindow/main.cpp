@@ -1,7 +1,9 @@
 ﻿#include <Windows.h>
+#include "resource.h"
 
 CONST CHAR g_sz_WINDOW_CLASS[] = "My first window";
 
+VOID UpdateWindowTitle(HWND hwnd);
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevinst, LPSTR lpCmdLine, INT nCmdShow)
@@ -18,9 +20,20 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevinst, LPSTR lpCmdLine, IN
 	wClass.cbWndExtra = 0;
 
 	//Инициализируем внешний вид окон:
-	wClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-	wClass.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
-	wClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+	//wClass.hIcon = (HICON)LoadImage(NULL, "bmw.ico", IMAGE_ICON, LR_DEFAULTSIZE, LR_DEFAULTSIZE, LR_LOADFROMFILE);
+	//wClass.hIconSm = (HICON)LoadImage(NULL, "dollars.ico", IMAGE_ICON, LR_DEFAULTSIZE, LR_DEFAULTSIZE, LR_LOADFROMFILE);
+	wClass.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON_DOLLARS));
+	wClass.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON_BMW));
+
+	/*wClass.hCursor = (HCURSOR)LoadImage
+	(
+		hInstance, 
+		"warframe\\Working.ani", 
+		IMAGE_CURSOR,
+		LR_DEFAULTSIZE, LR_DEFAULTSIZE,
+		LR_LOADFROMFILE
+	);*/
+	wClass.hCursor = LoadCursor(hInstance, MAKEINTRESOURCE(IDC_CURSOR1));
 	wClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 
 	//Инициализация системных переменных:
@@ -37,14 +50,23 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevinst, LPSTR lpCmdLine, IN
 
 	///////////////////////////////////////////////////////////////////
 	////////////2)			СОЗДАНИЕ ОКНА		      /////////////////
+
+	int ScreenWidth = GetSystemMetrics(SM_CXSCREEN);
+	int ScreenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+	int WindowWidth = GetSystemMetrics(SM_CXSCREEN) * 3 / 4;
+	int WindowHeight = GetSystemMetrics(SM_CYSCREEN) * 3 / 4;
+
+
+
 	HWND hwnd = CreateWindowEx
 	(
 		NULL,					//exStyle
 		g_sz_WINDOW_CLASS,		//Имя класса окна
 		g_sz_WINDOW_CLASS,		//Заголовок окна
 		WS_OVERLAPPEDWINDOW,	//Стиль окна. Стили всегда зависят от класс окна. "WS_OVERLAPPEDWINDOW" - это главное окно
-		CW_USEDEFAULT, CW_USEDEFAULT,	//Position
-		CW_USEDEFAULT, CW_USEDEFAULT,	//Размер окна
+		(ScreenWidth - WindowWidth) / 2, (ScreenHeight - WindowHeight) / 2,	//Position
+		WindowWidth, WindowHeight,	//Размер окна
 		NULL,
 		NULL,	//Для главного окна это ResourceID главного меню, 
 				//для дочернего окна - Resource ID дочернего окна(IDC_BUTTON_COPY)
@@ -56,13 +78,36 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevinst, LPSTR lpCmdLine, IN
 		MessageBox(NULL, "Windows creation failed", NULL, MB_OK | MB_ICONERROR);
 		return 0;
 	}
-	ShowWindow(hwnd, nCmdShow);
-	UpdateWindow(hwnd);
+	ShowWindow(hwnd, nCmdShow);	//Задаёт режим отображения окна. Развёрнуто на весь экран, свёрнуто в окно...
+	UpdateWindow(hwnd);	//Обновляет рабочую область окна, отправляет сообщение WM_PAINT, 
+						//если клиентская область окна не пустая
 
 
 	///////////////////////////////////////////////////////////////////
 	/////////3)			ЗАПУСК ЦИКЛА СООБЩЕНИЙ		      /////////////
-	return 0;
+	MSG msg;
+	while (GetMessage(&msg, NULL, 0, 0) > 0)
+	{
+		TranslateMessage(&msg);	//Преобразует сообщения виртуальных клавиш в символьные сообщения. 
+		DispatchMessage(&msg);	//Отправляет сообщение в процедуру окна.
+	}
+	return msg.wParam;
+}
+
+VOID UpdateWindowTitle(HWND hwnd)
+{
+	RECT rect;
+	GetWindowRect(hwnd, &rect);
+
+	INT x = rect.left, y = rect.top;
+	INT Width = rect.right - rect.left;
+	INT Height = rect.bottom - rect.top;
+	
+	CONST INT SIZE = 256;
+	CHAR sz_buffer[SIZE] = {};
+	wsprintf(sz_buffer, "Позиция: X=%d Y=%d, Размер: Ширина: %d, Высота: %d",x, y, Width, Height);
+
+	SetWindowText(hwnd, sz_buffer);
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -72,6 +117,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_CREATE:
 		break;
 	case WM_COMMAND:
+		break;
+	case WM_WINDOWPOSCHANGED:
+		UpdateWindowTitle(hwnd);
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
