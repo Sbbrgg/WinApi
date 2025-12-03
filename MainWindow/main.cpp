@@ -1,6 +1,8 @@
 ﻿#include <Windows.h>
 #include "resource.h"
 
+#define IDC_BUTTON 1000
+
 CONST CHAR g_sz_WINDOW_CLASS[] = "My first window";
 
 VOID UpdateWindowTitle(HWND hwnd);
@@ -27,8 +29,8 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevinst, LPSTR lpCmdLine, IN
 
 	/*wClass.hCursor = (HCURSOR)LoadImage
 	(
-		hInstance, 
-		"warframe\\Working.ani", 
+		hInstance,
+		"warframe\\Working.ani",
 		IMAGE_CURSOR,
 		LR_DEFAULTSIZE, LR_DEFAULTSIZE,
 		LR_LOADFROMFILE
@@ -69,7 +71,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevinst, LPSTR lpCmdLine, IN
 		WindowWidth, WindowHeight,	//Размер окна
 		NULL,
 		NULL,	//Для главного окна это ResourceID главного меню, 
-				//для дочернего окна - Resource ID дочернего окна(IDC_BUTTON_COPY)
+		//для дочернего окна - Resource ID дочернего окна(IDC_BUTTON_COPY)
 		hInstance,
 		NULL
 	);
@@ -80,11 +82,11 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevinst, LPSTR lpCmdLine, IN
 	}
 	ShowWindow(hwnd, nCmdShow);	//Задаёт режим отображения окна. Развёрнуто на весь экран, свёрнуто в окно...
 	UpdateWindow(hwnd);	//Обновляет рабочую область окна, отправляет сообщение WM_PAINT, 
-						//если клиентская область окна не пустая
+	//если клиентская область окна не пустая
 
 
-	///////////////////////////////////////////////////////////////////
-	/////////3)			ЗАПУСК ЦИКЛА СООБЩЕНИЙ		      /////////////
+///////////////////////////////////////////////////////////////////
+/////////3)			ЗАПУСК ЦИКЛА СООБЩЕНИЙ		      /////////////
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0) > 0)
 	{
@@ -102,10 +104,10 @@ VOID UpdateWindowTitle(HWND hwnd)
 	INT x = rect.left, y = rect.top;
 	INT Width = rect.right - rect.left;
 	INT Height = rect.bottom - rect.top;
-	
+
 	CONST INT SIZE = 256;
 	CHAR sz_buffer[SIZE] = {};
-	wsprintf(sz_buffer, "Позиция: X=%d Y=%d, Размер: Ширина: %d, Высота: %d",x, y, Width, Height);
+	wsprintf(sz_buffer, "Позиция: X=%d Y=%d, Размер: Ширина: %d, Высота: %d", x, y, Width, Height);
 
 	SetWindowText(hwnd, sz_buffer);
 }
@@ -115,9 +117,32 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	switch (uMsg)
 	{
 	case WM_CREATE:
-		break;
+	{
+		HWND hButton = CreateWindowExA
+		(
+			NULL,					//exStyle
+			"Button",				//Class
+			"Кнопка",				//Title
+			WS_CHILD | WS_VISIBLE,	//Style
+			10, 10,					//Position
+			150, 80,				//Size
+			hwnd,					//Parent
+			(HMENU)IDC_BUTTON,			//
+			GetModuleHandle(NULL),	//hInstance
+			NULL					//??????
+		);
+	}
+	break;
 	case WM_COMMAND:
-		break;
+	{
+		switch (LOWORD(wParam))
+		{
+		case IDC_BUTTON:
+			MessageBox(hwnd, "Cursor check", "Info", MB_OK | MB_ICONINFORMATION);
+			break;
+		}
+	}
+	break;
 	case WM_WINDOWPOSCHANGED:
 		UpdateWindowTitle(hwnd);
 		break;
