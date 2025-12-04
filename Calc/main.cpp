@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <Windows.h>
 #include "resource.h"
 
@@ -195,7 +196,51 @@ LRESULT CALLBACK WndProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 	break;
 	case WM_COMMAND:
-		break;
+	{
+		switch (wParam)
+		{
+		case IDC_BUTTON_0:
+		case IDC_BUTTON_1:
+		case IDC_BUTTON_2:
+		case IDC_BUTTON_3:
+		case IDC_BUTTON_4:
+		case IDC_BUTTON_5:
+		case IDC_BUTTON_6:
+		case IDC_BUTTON_7:
+		case IDC_BUTTON_8:
+		case IDC_BUTTON_9:
+		{
+			CHAR digit = '0' + (LOWORD(wParam) - IDC_BUTTON_0);
+			CHAR sz_digit[2];
+			sz_digit[0] = digit;
+			sz_digit[1] = '\0';
+
+			INT textLength = SendMessage(GetDlgItem(hwnd, IDC_DISPLAY), WM_GETTEXTLENGTH, 0, 0);
+
+			CHAR* sz_buffer = new CHAR[textLength + 2];
+
+			SendMessage(GetDlgItem(hwnd, IDC_DISPLAY), WM_GETTEXT, textLength + 1, (LPARAM)sz_buffer);
+
+			if (strcmp(sz_buffer, "0") == 0)
+			{
+				SendMessage(GetDlgItem(hwnd, IDC_DISPLAY), WM_SETTEXT, NULL, (LPARAM)sz_digit);
+			}
+			else
+			{
+				strcat(sz_buffer, sz_digit);
+				SendMessage(GetDlgItem(hwnd, IDC_DISPLAY), WM_SETTEXT, NULL, (LPARAM)sz_buffer);
+			}
+			delete[] sz_buffer;
+			break;
+		}
+		//Кнопки 0-9
+
+		
+
+		//Конец свича
+		}
+	}
+	break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
@@ -206,3 +251,31 @@ LRESULT CALLBACK WndProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 	return FALSE;
 }
+
+
+
+/*WORD PressedButtonId = LOWORD(wParam);
+		if (PressedButtonId >= IDC_BUTTON_0 && PressedButtonId <= IDC_BUTTON_9)
+		{
+			CHAR digit = '0' + (PressedButtonId - IDC_BUTTON_0);
+			CHAR sz_digit[2];
+			sz_digit[0] = digit;
+			sz_digit[1] = '\0';
+
+			INT textLength = SendMessage(GetDlgItem(hwnd, IDC_DISPLAY), WM_GETTEXTLENGTH, 0, 0);
+
+			CHAR* sz_buffer = new CHAR[textLength + 2];
+
+			SendMessage(GetDlgItem(hwnd, IDC_DISPLAY), WM_GETTEXT, textLength + 1, (LPARAM)sz_buffer);
+
+			if (strcmp(sz_buffer, "0") == 0)
+			{
+				SendMessage(GetDlgItem(hwnd, IDC_DISPLAY), WM_SETTEXT, NULL, (LPARAM)sz_digit);
+			}
+			else
+			{
+				strcat(sz_buffer, sz_digit);
+				SendMessage(GetDlgItem(hwnd, IDC_DISPLAY), WM_SETTEXT, NULL, (LPARAM)sz_buffer);
+			}
+			delete[] sz_buffer;
+		}*/
