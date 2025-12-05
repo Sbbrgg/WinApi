@@ -211,6 +211,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam)
 		SendMessage(hDisplay, WM_GETTEXT, sizeof(sz_CurrentEdit), (LPARAM)sz_CurrentEdit);
 
 		WORD PressedButtonId = LOWORD(wParam);
+
 		if (PressedButtonId >= IDC_BUTTON_0 && PressedButtonId <= IDC_BUTTON_9)
 		{
 			CHAR Digit[2] = {};
@@ -232,7 +233,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam)
 				lstrcat(sz_CurrentEdit, Digit);
 				SendMessage(hDisplay, WM_SETTEXT, NULL, (LPARAM)sz_CurrentEdit);
 			}
-		}
+		}//0-9
 		else if (PressedButtonId >= IDC_BUTTON_PLUS && PressedButtonId <= IDC_BUTTON_SLASH)
 		{
 			DOUBLE CurrentValue = atof(sz_CurrentEdit);
@@ -271,7 +272,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam)
 			IsChoosenOperation = TRUE;
 			IsNewNumber = FALSE;
 
-		}
+		}//+-/*
 		else if (PressedButtonId == IDC_BUTTON_POINT)
 		{
 			if (IsChoosenOperation || IsNewNumber)
@@ -285,7 +286,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam)
 				lstrcat(sz_CurrentEdit, ".");
 				SendMessage(hDisplay, WM_SETTEXT, NULL, (LPARAM)sz_CurrentEdit);
 			}
-		}
+		}//'.'
 		else if (PressedButtonId == IDC_BUTTON_EQUAL)
 		{
 			if (CurrentOperationID != 0)
@@ -322,15 +323,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam)
 				IsChoosenOperation = FALSE;
 				IsNewNumber = TRUE;
 			}
-		}
+		}//=
 		else if (PressedButtonId == IDC_BUTTON_CLR)
 		{
 			SendMessage(hDisplay, WM_SETTEXT, NULL, (LPARAM)"0");
+			ZeroMemory(sz_CurrentEdit, sizeof(sz_CurrentEdit));
 			savedNumber = 0;
 			IsChoosenOperation = FALSE;
 			CurrentOperationID = 0;
 			IsNewNumber = TRUE;
-		}
+		}//Clear
 		else if (PressedButtonId == IDC_BUTTON_BSP)
 		{
 			if (strlen(sz_CurrentEdit) > 1)
@@ -343,7 +345,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam)
 				SendMessage(hDisplay, WM_SETTEXT, NULL, (LPARAM)"0");
 				IsNewNumber = TRUE;
 			}
-		}
+		}//Backspase
 	}
 	break;
 	case WM_DESTROY:
