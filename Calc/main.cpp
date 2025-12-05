@@ -1,4 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS
+п»ї#define _CRT_SECURE_NO_WARNINGS
 #include <Windows.h>
 #include "resource.h"
 #include <stdio.h>
@@ -28,7 +28,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam);
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, INT nCmdShow)
 {
-	//1)Регистрация класс окна:
+	//1)Р РµРіРёСЃС‚СЂР°С†РёСЏ РєР»Р°СЃСЃ РѕРєРЅР°:
 	WNDCLASSEX wClass;
 	ZeroMemory(&wClass, sizeof(wClass));
 
@@ -53,7 +53,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, IN
 		return 0;
 	}
 
-	//2)Создагие окна:
+	//2)РЎРѕР·РґР°РіРёРµ РѕРєРЅР°:
 	HWND hwnd = CreateWindowEx
 	(
 		NULL,													//exStyle
@@ -74,7 +74,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInst, LPSTR lpCmdLine, IN
 	}
 	ShowWindow(hwnd, nCmdShow);
 	UpdateWindow(hwnd);
-	//3)Запуск цикла сообщений:
+	//3)Р—Р°РїСѓСЃРє С†РёРєР»Р° СЃРѕРѕР±С‰РµРЅРёР№:
 	MSG msg = {};
 	while (GetMessage(&msg, NULL, 0, 0) > 0)
 	{
@@ -395,11 +395,11 @@ case IDC_BUTTON_9:
 	delete[] sz_buffer;
 	break;
 }
-//Кнопки 0-9
+//РљРЅРѕРїРєРё 0-9
 
 
 
-//Конец свича
+//РљРѕРЅРµС† СЃРІРёС‡Р°
 }
 */
 /*CHAR digit = '0' + (PressedButtonId - IDC_BUTTON_0);
