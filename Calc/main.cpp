@@ -1,6 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <Windows.h>
 #include "resource.h"
+#include <stdio.h>
 
 CONST CHAR g_sz_WINDOW_CLASS[] = "Calc PV_521";
 
@@ -197,47 +198,118 @@ LRESULT CALLBACK WndProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam)
 	break;
 	case WM_COMMAND:
 	{
-		switch (wParam)
+		static DOUBLE savedNumber = 0.0;
+		static INT CurrentOperationID = 0;
+		static BOOL IsChoosenOperation = FALSE;
+
+		CONST INT SIZE = 256;
+		CHAR sz_CurrentEdit[256] = {};
+
+		HWND hDispay = GetDlgItem(hwnd, IDC_DISPLAY);
+
+		SendMessage(hDispay, WM_GETTEXT, sizeof(sz_CurrentEdit), (LPARAM)sz_CurrentEdit);
+
+		WORD PressedButtonId = LOWORD(wParam);
+		if (PressedButtonId >= IDC_BUTTON_0 && PressedButtonId <= IDC_BUTTON_9)
 		{
-		case IDC_BUTTON_0:
-		case IDC_BUTTON_1:
-		case IDC_BUTTON_2:
-		case IDC_BUTTON_3:
-		case IDC_BUTTON_4:
-		case IDC_BUTTON_5:
-		case IDC_BUTTON_6:
-		case IDC_BUTTON_7:
-		case IDC_BUTTON_8:
-		case IDC_BUTTON_9:
-		{
-			CHAR digit = '0' + (LOWORD(wParam) - IDC_BUTTON_0);
-			CHAR sz_digit[2];
-			sz_digit[0] = digit;
-			sz_digit[1] = '\0';
-
-			INT textLength = SendMessage(GetDlgItem(hwnd, IDC_DISPLAY), WM_GETTEXTLENGTH, 0, 0);
-
-			CHAR* sz_buffer = new CHAR[textLength + 2];
-
-			SendMessage(GetDlgItem(hwnd, IDC_DISPLAY), WM_GETTEXT, textLength + 1, (LPARAM)sz_buffer);
-
-			if (strcmp(sz_buffer, "0") == 0)
+			CHAR Digit[2] = {};
+			if (IsChoosenOperation)
 			{
-				SendMessage(GetDlgItem(hwnd, IDC_DISPLAY), WM_SETTEXT, NULL, (LPARAM)sz_digit);
+				sz_CurrentEdit[0] = 0;
+				IsChoosenOperation = FALSE;
+			}
+			Digit[0] = '0' + (PressedButtonId - IDC_BUTTON_0);
+			Digit[1] = '\0';
+
+			if (lstrcmp(sz_CurrentEdit, "0") == 0)
+			{
+				SendMessage(hDispay, WM_SETTEXT, NULL, (LPARAM)Digit);
 			}
 			else
 			{
-				strcat(sz_buffer, sz_digit);
-				SendMessage(GetDlgItem(hwnd, IDC_DISPLAY), WM_SETTEXT, NULL, (LPARAM)sz_buffer);
+				lstrcat(sz_CurrentEdit, Digit);
+				SendMessage(hDispay, WM_SETTEXT, NULL, (LPARAM)sz_CurrentEdit);
 			}
-			delete[] sz_buffer;
-			break;
 		}
-		//Кнопки 0-9
+		else if (PressedButtonId >= IDC_BUTTON_PLUS && PressedButtonId <= IDC_BUTTON_SLASH)
+		{
+			if (CurrentOperationID == 0)
+			{
+				SendMessage(hDispay, WM_GETTEXT, sizeof(sz_CurrentEdit), (LPARAM)sz_CurrentEdit);
+				savedNumber = atof(sz_CurrentEdit);
 
-		
+				CurrentOperationID = PressedButtonId;
+				IsChoosenOperation = TRUE;
 
-		//Конец свича
+			}
+		}
+		else if (PressedButtonId == IDC_BUTTON_POINT)
+		{
+			if (IsChoosenOperation)
+			{
+				SendMessage(hDispay, WM_SETTEXT, NULL, (LPARAM)"0.");
+				IsChoosenOperation = FALSE;
+			}
+			else if (strchr(sz_CurrentEdit, '.') == NULL)
+			{
+				lstrcat(sz_CurrentEdit, ".");
+				SendMessage(hDispay, WM_SETTEXT, NULL, (LPARAM)sz_CurrentEdit);
+			}
+		}
+		else if (PressedButtonId == IDC_BUTTON_EQUAL)
+		{
+			if (CurrentOperationID != 0)
+			{
+				DOUBLE CurrentValue = 0.0;
+				CHAR buffer[SIZE] = {};
+
+				SendMessage(hDispay, WM_GETTEXT, sizeof(buffer), (LPARAM)buffer);
+				CurrentValue = atof(buffer);
+
+				switch (CurrentOperationID)
+				{
+				case IDC_BUTTON_PLUS:
+					savedNumber += CurrentValue;
+					break;
+				case IDC_BUTTON_MINUS:
+					savedNumber -= CurrentValue;
+					break;
+				case IDC_BUTTON_ASTER:
+					savedNumber *= CurrentValue;
+					break;
+				case IDC_BUTTON_SLASH:
+					if (CurrentValue != 0)
+						savedNumber /= CurrentValue;
+					else
+						MessageBox(NULL, "Error", NULL, MB_OK | MB_ICONERROR);
+					break;
+				}
+				
+				sprintf(buffer, "%g", savedNumber);
+				SendMessage(hDispay, WM_SETTEXT, NULL, (LPARAM)buffer);
+
+				CurrentOperationID = 0;
+				IsChoosenOperation = FALSE;
+			}
+		}
+		else if (PressedButtonId == IDC_BUTTON_CLR)
+		{
+			SendMessage(hDispay, WM_SETTEXT, NULL, (LPARAM)"0");
+			savedNumber = 0;
+			IsChoosenOperation = FALSE;
+			CurrentOperationID = 0;
+		}
+		else if (PressedButtonId == IDC_BUTTON_BSP)
+		{
+			if (strlen(sz_CurrentEdit) > 1)
+			{
+				sz_CurrentEdit[strlen(sz_CurrentEdit) - 1] = '\0';
+				SendMessage(hDispay, WM_SETTEXT, NULL, (LPARAM)sz_CurrentEdit);
+			}
+			else
+			{
+				SendMessage(hDispay, WM_SETTEXT, NULL, (LPARAM)"0");
+			}
 		}
 	}
 	break;
@@ -253,11 +325,51 @@ LRESULT CALLBACK WndProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam)
 }
 
 
+/*
+switch (wParam)
+{
+case IDC_BUTTON_0:
+case IDC_BUTTON_1:
+case IDC_BUTTON_2:
+case IDC_BUTTON_3:
+case IDC_BUTTON_4:
+case IDC_BUTTON_5:
+case IDC_BUTTON_6:
+case IDC_BUTTON_7:
+case IDC_BUTTON_8:
+case IDC_BUTTON_9:
+{
+	CHAR digit = '0' + (LOWORD(wParam) - IDC_BUTTON_0);
+	CHAR sz_digit[2];
+	sz_digit[0] = digit;
+	sz_digit[1] = '\0';
 
-/*WORD PressedButtonId = LOWORD(wParam);
-		if (PressedButtonId >= IDC_BUTTON_0 && PressedButtonId <= IDC_BUTTON_9)
-		{
-			CHAR digit = '0' + (PressedButtonId - IDC_BUTTON_0);
+	INT textLength = SendMessage(GetDlgItem(hwnd, IDC_DISPLAY), WM_GETTEXTLENGTH, 0, 0);
+
+	CHAR* sz_buffer = new CHAR[textLength + 2];
+
+	SendMessage(GetDlgItem(hwnd, IDC_DISPLAY), WM_GETTEXT, textLength + 1, (LPARAM)sz_buffer);
+
+	if (strcmp(sz_buffer, "0") == 0)
+	{
+		SendMessage(GetDlgItem(hwnd, IDC_DISPLAY), WM_SETTEXT, NULL, (LPARAM)sz_digit);
+	}
+	else
+	{
+		strcat(sz_buffer, sz_digit);
+		SendMessage(GetDlgItem(hwnd, IDC_DISPLAY), WM_SETTEXT, NULL, (LPARAM)sz_buffer);
+	}
+	delete[] sz_buffer;
+	break;
+}
+//Кнопки 0-9
+
+
+
+//Конец свича
+}
+*/
+/*CHAR digit = '0' + (PressedButtonId - IDC_BUTTON_0);
 			CHAR sz_digit[2];
 			sz_digit[0] = digit;
 			sz_digit[1] = '\0';
@@ -277,5 +389,4 @@ LRESULT CALLBACK WndProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam)
 				strcat(sz_buffer, sz_digit);
 				SendMessage(GetDlgItem(hwnd, IDC_DISPLAY), WM_SETTEXT, NULL, (LPARAM)sz_buffer);
 			}
-			delete[] sz_buffer;
-		}*/
+			delete[] sz_buffer;*/
