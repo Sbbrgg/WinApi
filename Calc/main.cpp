@@ -202,6 +202,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam)
 		static INT CurrentOperationID = 0;
 		static BOOL IsChoosenOperation = FALSE;
 		static BOOL IsNewNumber = TRUE;
+		static DOUBLE lastOperand = 0.0;
+		static BOOL isChainMode = FALSE;
 
 		CONST INT SIZE = 256;
 		CHAR sz_CurrentEdit[256] = {};
@@ -270,7 +272,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam)
 			}
 			CurrentOperationID = PressedButtonId;
 			IsChoosenOperation = TRUE;
-			IsNewNumber = FALSE;
+			IsNewNumber = TRUE;
 
 		}//+-/*
 		else if (PressedButtonId == IDC_BUTTON_POINT)
@@ -289,46 +291,80 @@ LRESULT CALLBACK WndProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam)
 		}//'.'
 		else if (PressedButtonId == IDC_BUTTON_EQUAL)
 		{
+			DOUBLE CurrentValue = atof(sz_CurrentEdit);
+			CHAR buffer[SIZE] = {};
+
 			if (CurrentOperationID != 0)
 			{
-				DOUBLE CurrentValue = atof(sz_CurrentEdit);
-				CHAR buffer[SIZE] = {};
-
-				switch (CurrentOperationID)
+				if (!IsNewNumber)
 				{
-				case IDC_BUTTON_PLUS:
-					savedNumber += CurrentValue;
-					break;
-				case IDC_BUTTON_MINUS:
-					savedNumber -= CurrentValue;
-					break;
-				case IDC_BUTTON_ASTER:
-					savedNumber *= CurrentValue;
-					break;
-				case IDC_BUTTON_SLASH:
-					if (CurrentValue != 0)
-						savedNumber /= CurrentValue;
-					else
+					switch (CurrentOperationID)
 					{
-						MessageBox(NULL, "Error", "Error", MB_OK | MB_ICONERROR);
-						savedNumber = 0;
+					case IDC_BUTTON_PLUS:
+						savedNumber += CurrentValue;
+						break;
+					case IDC_BUTTON_MINUS:
+						savedNumber -= CurrentValue;
+						break;
+					case IDC_BUTTON_ASTER:
+						savedNumber *= CurrentValue;
+						break;
+					case IDC_BUTTON_SLASH:
+						if (CurrentValue != 0)
+							savedNumber /= CurrentValue;
+						else
+						{
+							MessageBox(NULL, "Деление на ноль", "Ошибка", MB_OK | MB_ICONERROR);
+							savedNumber = 0;
+						}
+						break;
 					}
-					break;
+					lastOperand = CurrentValue;
 				}
-				
-				sprintf(buffer, "%g", savedNumber);
-				SendMessage(hDisplay, WM_SETTEXT, NULL, (LPARAM)buffer);
-
-				CurrentOperationID = 0;
-				IsChoosenOperation = FALSE;
-				IsNewNumber = TRUE;
+				else
+				{
+					switch (CurrentOperationID)
+					{
+					case IDC_BUTTON_PLUS:
+						savedNumber += lastOperand;
+						break;
+					case IDC_BUTTON_MINUS:
+						savedNumber -= lastOperand;
+						break;
+					case IDC_BUTTON_ASTER:
+						savedNumber *= lastOperand;
+						break;
+					case IDC_BUTTON_SLASH:
+						if (lastOperand != 0)
+							savedNumber /= lastOperand;
+						else
+						{
+							MessageBox(NULL, "Деление на ноль", "Ошибка", MB_OK | MB_ICONERROR);
+							savedNumber = 0;
+						}
+						break;
+					}
+				}
 			}
+			else
+			{
+				savedNumber = CurrentValue;
+				lastOperand = CurrentValue;
+			}
+
+			sprintf(buffer, "%g", savedNumber);
+			SendMessage(hDisplay, WM_SETTEXT, NULL, (LPARAM)buffer);
+
+			IsNewNumber = TRUE;
+			isChainMode = TRUE;
+
 		}//=
 		else if (PressedButtonId == IDC_BUTTON_CLR)
 		{
 			SendMessage(hDisplay, WM_SETTEXT, NULL, (LPARAM)"0");
 			ZeroMemory(sz_CurrentEdit, sizeof(sz_CurrentEdit));
 			savedNumber = 0;
+			lastOperand = 0.0;
 			IsChoosenOperation = FALSE;
 			CurrentOperationID = 0;
 			IsNewNumber = TRUE;
@@ -346,6 +382,98 @@ LRESULT CALLBACK WndProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam)
 				IsNewNumber = TRUE;
 			}
 		}//Backspase
+	}
+	break;
+	case WM_KEYDOWN:
+	{
+		if (GetKeyState(VK_SHIFT) < 0 && wParam == '8')
+			SendMessage(GetDlgItem(hwnd, IDC_BUTTON_ASTER), BM_SETSTATE, TRUE, 0);
+		else if (wParam >= '0' && wParam <= '9')
+			SendMessage(GetDlgItem(hwnd, wParam - '0' + IDC_BUTTON_0), BM_SETSTATE, TRUE, 0);
+		else if (wParam >= 0x60 && wParam <= 0x69)
+			SendMessage(GetDlgItem(hwnd, wParam - 0x60 + IDC_BUTTON_0), BM_SETSTATE, TRUE, 0);
+		switch (wParam)
+		{
+		case VK_OEM_PLUS:
+		case VK_ADD: SendMessage(GetDlgItem(hwnd, IDC_BUTTON_PLUS), BM_SETSTATE, TRUE, 0); break;
+		case VK_OEM_MINUS:
+		case VK_SUBTRACT: SendMessage(GetDlgItem(hwnd, IDC_BUTTON_MINUS), BM_SETSTATE, TRUE, 0); break;
+		case VK_MULTIPLY: SendMessage(GetDlgItem(hwnd, IDC_BUTTON_ASTER), BM_SETSTATE, TRUE, 0); break;
+		case VK_OEM_2:	//деление
+		case VK_DIVIDE: SendMessage(GetDlgItem(hwnd, IDC_BUTTON_SLASH), BM_SETSTATE, TRUE, 0); break;
+		case VK_OEM_PERIOD:
+		case VK_DECIMAL: SendMessage(GetDlgItem(hwnd, IDC_BUTTON_POINT), BM_SETSTATE, TRUE, 0); break;
+
+
+		case VK_BACK: SendMessage(GetDlgItem(hwnd, IDC_BUTTON_BSP), BM_SETSTATE, TRUE, 0); break;
+		case VK_ESCAPE: SendMessage(GetDlgItem(hwnd, IDC_BUTTON_CLR), BM_SETSTATE, TRUE, 0); break;
+		case VK_RETURN: SendMessage(GetDlgItem(hwnd, IDC_BUTTON_EQUAL), BM_SETSTATE, TRUE, 0); break;
+		}
+	}
+	break;
+	case WM_KEYUP:
+	{
+		if (GetKeyState(VK_SHIFT) < 0 && wParam == '8')
+		{
+			SendMessage(hwnd, WM_COMMAND, LOWORD(IDC_BUTTON_ASTER), 0);
+			SendMessage(GetDlgItem(hwnd, IDC_BUTTON_ASTER), BM_SETSTATE, FALSE, 0);
+		}
+		else if (wParam >= '0' && wParam <= '9')
+		{
+			SendMessage(hwnd, WM_COMMAND, LOWORD(wParam - '0' + IDC_BUTTON_0), 0);
+			SendMessage(GetDlgItem(hwnd, wParam - '0' + IDC_BUTTON_0), BM_SETSTATE, FALSE, 0);
+		}
+		else if (wParam >= 0x60 && wParam <= 0x69)
+		{
+			SendMessage(hwnd, WM_COMMAND, LOWORD(wParam - 0x60 + IDC_BUTTON_0), 0);
+			SendMessage(GetDlgItem(hwnd, wParam - 0x60 + IDC_BUTTON_0), BM_SETSTATE, FALSE, 0);
+		}
+		switch (wParam)
+		{
+		case VK_OEM_PLUS:
+		case VK_ADD:
+			SendMessage(hwnd, WM_COMMAND, LOWORD(IDC_BUTTON_PLUS), 0);
+			SendMessage(GetDlgItem(hwnd, IDC_BUTTON_PLUS), BM_SETSTATE, FALSE, 0);
+			break;
+
+		case VK_OEM_MINUS:
+		case VK_SUBTRACT:
+			SendMessage(hwnd, WM_COMMAND, LOWORD(IDC_BUTTON_MINUS), 0);
+			SendMessage(GetDlgItem(hwnd, IDC_BUTTON_MINUS), BM_SETSTATE, FALSE, 0);
+			break;
+
+		case VK_MULTIPLY:
+			SendMessage(hwnd, WM_COMMAND, LOWORD(IDC_BUTTON_ASTER), 0);
+			SendMessage(GetDlgItem(hwnd, IDC_BUTTON_ASTER), BM_SETSTATE, FALSE, 0);
+			break;
+
+		case VK_OEM_2:
+		case VK_DIVIDE:
+			SendMessage(hwnd, WM_COMMAND, LOWORD(IDC_BUTTON_SLASH), 0);
+			SendMessage(GetDlgItem(hwnd, IDC_BUTTON_SLASH), BM_SETSTATE, FALSE, 0);
+			break;
+
+		case VK_OEM_PERIOD:
+		case VK_DECIMAL:
+			SendMessage(hwnd, WM_COMMAND, LOWORD(IDC_BUTTON_POINT), 0);
+			SendMessage(GetDlgItem(hwnd, IDC_BUTTON_POINT), BM_SETSTATE, FALSE, 0);
+			break;
+
+		case VK_BACK:
+			SendMessage(hwnd, WM_COMMAND, LOWORD(IDC_BUTTON_BSP), 0);
+			SendMessage(GetDlgItem(hwnd, IDC_BUTTON_BSP), BM_SETSTATE, FALSE, 0);
+			break;
+
+		case VK_ESCAPE:
+			SendMessage(hwnd, WM_COMMAND, LOWORD(IDC_BUTTON_CLR), 0);
+			SendMessage(GetDlgItem(hwnd, IDC_BUTTON_CLR), BM_SETSTATE, FALSE, 0);
+			break;
+
+		case VK_RETURN:
+			SendMessage(hwnd, WM_COMMAND, LOWORD(IDC_BUTTON_EQUAL), 0);
+			SendMessage(GetDlgItem(hwnd, IDC_BUTTON_EQUAL), BM_SETSTATE, FALSE, 0);
+			break;
+		}
 	}
 	break;
 	case WM_DESTROY:
