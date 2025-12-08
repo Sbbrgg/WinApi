@@ -198,6 +198,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam)
 	break;
 	case WM_COMMAND:
 	{
+		SetFocus(hwnd);
 		static DOUBLE savedNumber = 0.0;
 		static INT CurrentOperationID = 0;
 		static BOOL IsChoosenOperation = FALSE;
