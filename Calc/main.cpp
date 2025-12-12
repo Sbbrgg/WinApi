@@ -8,12 +8,14 @@
 
 CONST CHAR g_sz_WINDOW_CLASS[] = "Calc PV_521";
 
-CONST INT g_i_BUTTON_SIZE = 50;
-CONST INT g_i_INTERVAL = 1;
+CONST INT g_i_BUTTON_SIZE = 60;
+CONST INT g_i_INTERVAL = 5;
 CONST INT g_i_DISPLAY_INTERVAL = 10;
 CONST INT g_i_DOUBLE_BUTTON_SIZE = g_i_BUTTON_SIZE * 2 + g_i_INTERVAL;
 CONST INT g_i_DISPLAY_WIDTH = g_i_BUTTON_SIZE * 5 + g_i_INTERVAL * 4;
-CONST INT g_i_DISPLAY_HEIGHT = 22;
+CONST INT g_i_DISPLAY_HEIGHT = g_i_BUTTON_SIZE;
+CONST INT g_i_FONT_HEIGHT = g_i_DISPLAY_HEIGHT - 2;
+CONST INT g_i_FONT_WIDTH = g_i_FONT_HEIGHT / 2.5;
 CONST INT g_i_START_X = 10;
 CONST INT g_i_START_Y = 10;
 CONST INT g_i_BUTTON_START_X = g_i_START_X;
@@ -100,7 +102,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		AllocConsole();
 		freopen("CONOUT$", "w", stdout);
-		CreateWindowEx
+		HWND hEdit = CreateWindowEx
 		(
 			NULL,
 			"Edit",
@@ -113,6 +115,25 @@ LRESULT CALLBACK WndProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam)
 			GetModuleHandle(NULL),
 			NULL
 		);
+		AddFontResourceEx("Fonts\\digital-7\\digital-7.ttf", FR_PRIVATE, 0);
+		HFONT hFont = CreateFont
+		(
+			g_i_FONT_HEIGHT, g_i_FONT_WIDTH,
+			0, 0,
+			FW_BOLD,				//Font width - толщина
+			FALSE,					//Italic
+			FALSE,					//Underline
+			FALSE,					//strikeout
+			DEFAULT_CHARSET,
+			OUT_TT_PRECIS,
+			CLIP_TT_ALWAYS,
+			ANTIALIASED_QUALITY,	//наибольшее качество
+			//12
+			FF_DONTCARE,
+			"Digital-7"				//имя шрифта прямо из файла
+		);
+		SendMessage(hEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
+
 		CHAR sz_button[2] = {};
 		for (int i = 6; i >= 0; i -= 3)
 		{
@@ -424,7 +445,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam)
 		AppendMenu(cmMain, MF_STRING, IDM_METAL_MISTRAL, "Metal mistral");
 		AppendMenu(cmMain, MF_SEPARATOR, NULL, NULL);
 		AppendMenu(cmMain, MF_STRING, IDM_EXIT, "Exit");
-
+		//std::cout << *("0123456789" + 1) << std::endl;;// -как это работает ?
+		//int a = 2;
+		//int* pa = &a;
+		//std::cout << pa[0] << std::endl;
 		BOOL selected_item = TrackPopupMenuEx
 		(
 			cmMain,
