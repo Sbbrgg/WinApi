@@ -249,6 +249,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, INT uMsg, WPARAM wParam, LPARAM lParam)
 		EndPaint(hwnd, &pc);
 	}
 	break;
+	case WM_CTLCOLOREDIT:	//Всегда прилетает если есть EditControl у окна
+	{
+		HDC hdc = (HDC)wParam;	//С сообщением WN_CTLCOLOREDIT в 'wParam' принимается HDC элемента EditControl = hEdit. (HDC - handle device context)
+		SetBkMode(hdc, OPAQUE);	//Делаем фон hEdit непрозрачным
+		SetBkColor(hdc, RGB(0, 0, 100));
+		HBRUSH hBrush = CreateSolidBrush(RGB(0,0,150));
+		SetTextColor(hdc, RGB(105, 0, 0));
+		SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, (LONG_PTR)hBrush);
+		SendMessage(hwnd, WM_ERASEBKGND, wParam, 0);
+		return (LRESULT)hBrush;
+	}
+	break;
 	case WM_COMMAND:
 	{
 		//статик хранятся в той же области памяти, что и глобальные переменные, только доступ к ним имеет только функция, в которой они объявлены
