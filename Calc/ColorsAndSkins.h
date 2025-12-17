@@ -8,5 +8,6 @@ CONST COLORREF g_clr_COLORS[][3] =
 {
 	{ RGB(0, 0, 150,), RGB(0, 0, 100), RGB(150, 0 , 0)},
 	{ RGB(150, 150, 150), RGB(50, 50, 50), RGB(0, 255, 0)},
+	{ RGB(15, 15, 15), RGB(25, 25, 25), RGB(0, 255, 180)},
 };
-CONST CHAR* g_sz_SKIN[] = { "square_blue", "metal_mistral" };
+CONST CHAR* g_sz_SKIN[] = { "square_blue", "metal_mistral", "neon_dark" };

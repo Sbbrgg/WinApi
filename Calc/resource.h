@@ -5,6 +5,7 @@
 #define IDM_EXIT				200
 #define IDM_SQUARE_BLUE			201
 #define IDM_METAL_MISTRAL		202
+#define IDM_NEON_DARK			203
 
 #define IDC_DISPLAY				 999
 #define IDC_BUTTON_0			1000
